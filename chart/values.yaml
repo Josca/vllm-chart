@@ -1,0 +1,12 @@
+# GPU mode cuda (official):
+#  vllm/vllm-openai:latest
+# CPU mode:
+#  image: public.ecr.aws/q9t5s3a7/vllm-cpu-release-repo:v0.14.1
+# AMD GPU mode:
+#  image: rocm/vllm:rocm7.0.0_vllm_0.11.2_20251210
+image: public.ecr.aws/q9t5s3a7/vllm-cpu-release-repo:v0.14.1
+
+# Hugging Face model
+# - facebook/opt-125m (open, 753 MB)
+# - HuggingFaceTB/SmolLM2-135M (open, 272 MB)
+model: 'HuggingFaceTB/SmolLM2-135M'

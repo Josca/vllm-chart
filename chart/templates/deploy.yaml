@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: '{{ .Release.Name }}-server'
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: '{{ .Release.Name }}-app'
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: '{{ .Release.Name }}-app'
+    spec:
+      containers:
+      - name: vllm
+        image: '{{ $.Values.image }}'
+        command: ["/bin/sh", "-c"]
+        args: [
+          "vllm serve {{ $.Values.model }}"
+        ]
+        # args: ["sleep infinity"] # testing 
+        resources:
+          limits:
+            cpu: '4'
+            memory: 12Gi
+            # amd.com/gpu: 8
+          requests:
+            cpu: '1'
+            memory: 12Gi
+            # amd.com/gpu: 8
+        env:
+        ports:
+          - containerPort: 8000
+        volumeMounts:
+          - name: '{{ .Release.Name }}-storage'
+            mountPath: /root/.cache/huggingface
+      volumes:
+      - name: '{{ .Release.Name }}-storage'
+        persistentVolumeClaim:
+          claimName: '{{ .Release.Name }}-models'
