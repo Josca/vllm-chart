@@ -2,4 +2,4 @@ apiVersion: v2
 name: vllm
 description: Simple vLLM deployment
 type: application
-version: 1.0.0
+version: 0.0.1
