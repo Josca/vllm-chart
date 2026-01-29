@@ -10,11 +10,13 @@ image: rocm/vllm:rocm7.0.0_vllm_0.11.2_20251210
 # - facebook/opt-125m (open, 753 MB)
 # - HuggingFaceTB/SmolLM2-135M (open, 272 MB)
 model: 'HuggingFaceTB/SmolLM2-135M'
-sleepMode: false
+mode: server # 'server', 'sleep', 'gpu_test'
 
+replicas: 1
 cpu: '4'
-memory: 12Gi
-amdGpu: '4'
+memory: 10Gi
+amdGpus: '4'
 
 pvc:
+  enabled: true
   storage: 100Gi

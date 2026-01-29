@@ -1,11 +1,22 @@
 # vLLM Helm Chart
 
-## Usage
+## Run simple AMD GPUs test
+~~~bash
+# Install vllm
+helm install vllm ./chart -n vllm --create-namespace \
+  --set 'amdGpus=8' \
+  --set 'mode=gpu_test' \
+  --set 'pvc.enabled=false'
+
+# Get logs from vllm pod
+kubectl logs deploy/vllm -n vllm -f
+~~~
+
+## Run vLLM server
 ~~~bash
 # Install vllm deployment 
 helm install vllm ./chart -n vllm --create-namespace \
-  --set 'sleepMode=true' \
-  --set 'amdGpu=4'
+  --set 'amdGpus=4'
 
 # Create "testing ubuntu" pod
 kubectl apply -f testing-ubuntu.yaml

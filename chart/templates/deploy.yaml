@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: '{{ .Release.Name }}-server'
+  name: '{{ .Release.Name }}'
 spec:
-  replicas: 1
+  replicas: {{ $.Values.replicas }}
   selector:
     matchLabels:
       app.kubernetes.io/name: '{{ .Release.Name }}-app'
@@ -15,26 +15,44 @@ spec:
       containers:
       - name: vllm
         image: '{{ $.Values.image }}'
-        command: ["/bin/sh", "-c"]
-      {{- if .Values.sleepMode }}
-        args: ["sleep infinity"] # testing, attach to the pod and run test commands
-      {{- else }}
+        command: ["/bin/bash", "-c"]
+      {{- if eq .Values.mode "server" }}
         args: [
           "vllm serve {{ $.Values.model }}"
         ]
+      {{- else if eq .Values.mode "sleep" }}
+        args: ["sleep infinity"] # testing, attach to the pod and run test commands
+      {{- else if eq .Values.mode "gpu_test" }}
+        args:
+         - |
+           rocm-smi
+           ngpus=$(rocm-smi -i | grep GUID | wc -l)
+           for ((i=0; i<ngpus; i++)); do
+             HIP_VISIBLE_DEVICES=$i python3 - << 'EOF' &
+           import torch
+           a = torch.randn(8192,8192, device='cuda', dtype=torch.float16)
+           while True:
+               a = a @ a
+           EOF
+           done
+           while true; do
+            rocm-smi
+            sleep 1
+           done
       {{- end }}
         resources:
           limits:
             cpu: '{{ $.Values.cpu }}'
-            memory: 12Gi
-            amd.com/gpu: '{{ $.Values.amdGpu }}'
+            memory: '{{ $.Values.memory }}'
+            amd.com/gpu: '{{ $.Values.amdGpus }}'
           requests:
             cpu: '{{ $.Values.cpu }}'
-            memory: 12Gi
-            amd.com/gpu: '{{ $.Values.amdGpu }}'
+            memory: '{{ $.Values.memory }}'
+            amd.com/gpu: '{{ $.Values.amdGpus }}'
         env:
         ports:
           - containerPort: 8000
+  {{- if .Values.pvc.enabled }}
         volumeMounts:
           - name: '{{ .Release.Name }}-storage'
             mountPath: /root/.cache/huggingface
@@ -42,3 +60,4 @@ spec:
       - name: '{{ .Release.Name }}-storage'
         persistentVolumeClaim:
           claimName: '{{ .Release.Name }}-models'
+  {{- end }}
