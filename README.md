@@ -3,7 +3,9 @@
 ## Usage
 ~~~bash
 # Install vllm deployment 
-helm install vllm ./chart -n vllm --create-namespace
+helm install vllm ./chart -n vllm --create-namespace \
+  --set 'sleepMode=true' \
+  --set 'amdGpu=4'
 
 # Create "testing ubuntu" pod
 kubectl apply -f testing-ubuntu.yaml
