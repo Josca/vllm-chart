@@ -6,6 +6,8 @@ assert torch.version.hip is not None
 
 device = "cuda"
 
+# torch.backends.cudnn.fp32_precision = "tf32"
+
 M = N = K = 2**14
 
 # dtype = torch.float32 # FP32 (Vector)
